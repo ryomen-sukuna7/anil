@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sand Scatter Text Effect</title>
+<style>
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        background: linear-gradient(to right, #000000, #000000);
+        overflow: hidden;
+        margin: 0;
+    }
+    canvas {
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script>
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
+    const message = "Anil.S";
+    let particles = [];
+    let scatter = false;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    function initParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.font = "bold 35px Arial";
+        ctx.fillStyle = "#ffffff";
+        ctx.textAlign = "center";
+        ctx.fillText(message, canvas.width / 2, canvas.height / 2);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const data = imageData.data;
+        for (let y = 0; y < imageData.height; y += 3) {
+            for (let x = 0; x < imageData.width; x += 3) {
+                const index = (y * imageData.width + x) * 4;
+                if (data[index + 3] > 128) {  
+                    particles.push({
+                        x: x,
+                        y: y,
+                        homeX: x,
+                        homeY: y,
+                        dx: Math.random() * 2 - 1,
+                        dy: Math.random() * 2 - 1,
+                        size: 1
+                    });
+                }
+            }
+        }
+    }
+    function renderParticles() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles.forEach(p => {
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+            ctx.fillStyle = "#ffffff";
+            ctx.fill();
+        });
+    }
+    function updateParticles() {
+        particles.forEach(p => {
+            if (scatter) {
+                p.x += p.dx * 10;
+                p.y += p.dy * 10;
+            } else {
+                p.x += (p.homeX - p.x) * 0.1;
+                p.y += (p.homeY - p.y) * 0.1;
+            }
+        });
+    }
+    function animate() {
+        updateParticles();
+        renderParticles();
+        requestAnimationFrame(animate);
+    }
+    canvas.addEventListener("mousedown", () => { scatter = true; });
+    canvas.addEventListener("mouseup", () => { scatter = false; });
+    canvas.addEventListener("touchstart", () => { scatter = true; });
+    canvas.addEventListener("touchend", () => { scatter = false; });
+    initParticles();
+    animate();
+</script>
+</body>
+</html>
